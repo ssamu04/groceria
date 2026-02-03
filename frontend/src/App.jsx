@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router'
-import HomePage from './pages/Homepage'
 import DetailPage from './pages/DetailPage'
 import CreatePage from './pages/CreatePage'
+import HomePage from './pages/HomePage'
 
 const App = () => {
   return (

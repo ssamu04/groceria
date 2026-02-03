@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar'
 import RateLimitedUI from '../components/RateLimitedUI';
