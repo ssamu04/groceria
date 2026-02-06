@@ -1,6 +1,6 @@
 import React from 'react'
 import { useEffect } from 'react';
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon, Search } from 'lucide-react';
 import { useParams } from 'react-router';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
@@ -69,6 +69,7 @@ const SearchProductModal = ({ onProductAdded }) => {
     <div className="modal-box">
         <form method="dialog">
         <div className='flex justify-between items-center'>
+            <Search className='mr-2 text-secondary'/>
             <input
                 type="text"
                 placeholder="Search for an item to add..."
