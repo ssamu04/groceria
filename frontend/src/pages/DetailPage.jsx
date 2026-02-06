@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { ArrowLeftIcon, LoaderIcon, Trash2Icon } from 'lucide-react';
+import { ArrowLeftIcon, LoaderIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router';
 import api from '../lib/axios';
+import SearchProductModal from '../components/SearchProductModal';
 
 const DetailPage = () => {
     const [groceryList, setGroceryList] = useState(null);
@@ -10,6 +11,7 @@ const DetailPage = () => {
     const [saving, setSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState(0);
     const [lastSavedData, setLastSavedData] = useState(null);
+
 
     const navigate = useNavigate();
     const { id } = useParams();
@@ -91,6 +93,29 @@ const DetailPage = () => {
         onKeyDown: (e) => e.key === "Enter" && (e.preventDefault(), saveGroceryList()),
     };
 
+    const refreshGroceryList = async () => {
+        try {
+            const res = await api.get(`/groceria/${id}`);
+            setGroceryList(res.data);
+        } catch (err) {
+            console.log("Error refreshing grocery list", err);
+        }
+    };
+
+    const removeProduct = async (productId) => {
+        try {
+            await api.delete(`/groceria/${id}/products/${productId}`);
+            setGroceryList(prevList => ({
+                ...prevList,
+                products: prevList.products.filter(item => item._id !== productId)
+            }));
+            toast.success("Product removed from list");
+        } catch (err) {
+            console.log("Error removing product", err);
+            toast.error("Failed to remove product");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-base-200">
             <div className="container mx-auto px-4 py-8">
@@ -136,6 +161,40 @@ const DetailPage = () => {
                             </div>
 
                             {saving && <p className="text-sm text-gray-500">Saving...</p>}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="max-w-2xl mx-auto mt-4">
+                    <div className="card bg-base-100">
+                        <div className="card-body">
+                            <div className="flex items-center">
+                                <h2 className="m-3 text-lg text-secondary tracking-wide">Products</h2>
+                                <button
+                                    className="btn btn-primary btn-outline" 
+                                    onClick={()=>document.getElementById('search_products').showModal()}
+                                >
+                                    <PlusIcon className="h-5 w-5" />
+                                    Add
+                                </button>
+                                <dialog id="search_products" className="modal">
+                                    <SearchProductModal onProductAdded={refreshGroceryList} />
+                                </dialog>
+                            </div>
+                                <ul className="list">
+                                    {groceryList.products.map((item, index) => (
+                                    <li className="list-row" key={item.id ?? index}>
+                                        <div><img className="size-10 rounded-box" src={item.image_url || "/public/no-image.png"}/></div>
+                                        <div>
+                                        <div>{item.name}</div>
+                                        <div className="text-xs font-semibold opacity-60">Brand: {item.brand || "Unknown Brand"}</div>
+                                        </div>
+                                        <button className="btn btn-square btn-ghost" onClick={() => removeProduct(item._id)}>
+                                        <Trash2Icon className="size-4 text-error" />
+                                        </button>
+                                    </li>
+                                    ))}
+                                </ul>
                         </div>
                     </div>
                 </div>
