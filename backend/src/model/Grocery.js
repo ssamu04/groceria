@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Product from "./Product.js";
 
 const grocerySchema = new mongoose.Schema({
     name: {
@@ -8,6 +9,11 @@ const grocerySchema = new mongoose.Schema({
     description: {
         type: String,
         required: true
+    },
+    products: {
+        type: [Product.schema],
+        required: false,
+        default: []
     }
     // ,
     // price: {

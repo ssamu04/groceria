@@ -1,4 +1,5 @@
 import Grocery from "../model/Grocery.js"
+import Product from "../model/Product.js";
 
 export async function getAll (_, res) {
     try {
@@ -22,39 +23,39 @@ export async function getGroceryById (req, res) {
     }
 }
 
-export async function createItem (req, res) {
+export async function createList (req, res) {
     try {
         const { name, description } = req.body;
         const newGrocery = new Grocery({ name, description });
         await newGrocery.save();
-        res.status(201).json({message: "Grocery item created successfully", newGrocery});
+        res.status(201).json({message: "Grocery list created successfully", newGrocery});
     } catch (error) {
         res.status(500).json({message: "Server Error" });
     }
 }
 
-export async function updateItem (req, res) {
+export async function updateList (req, res) {
     try {
         const { id } = req.params;
         const { name, description } = req.body;
         const updatedGrocery = await Grocery.findByIdAndUpdate(id, { name, description }, { new: true });
         if (!updatedGrocery) {
-            return res.status(404).json({message: "Grocery item not found"});
+            return res.status(404).json({message: "Grocery list not found"});
         }
-        res.status(200).json({message: "Grocery item updated successfully", updatedGrocery});
+        res.status(200).json({message: "Grocery list updated successfully", updatedGrocery});
     } catch (error) {
         res.status(500).json({message: "Server Error" });
     }
 }
 
-export const deleteItem = async (req, res) => {
+export const deleteList = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedGrocery = await Grocery.findByIdAndDelete(id);
         if (!deletedGrocery) {
-            return res.status(404).json({message: "Grocery item not found"});
+            return res.status(404).json({message: "Grocery list not found"});
         }
-        res.status(200).json({message: "Grocery item deleted successfully", deletedGrocery});
+        res.status(200).json({message: "Grocery list deleted successfully", deletedGrocery});
     } catch (error) {
         res.status(500).json({message: "Server Error" });
     }
@@ -91,7 +92,7 @@ export async function searchItem (req, res) {
             (p.brands && p.brands.toLowerCase().includes(q.toLowerCase()))
         );
         const total_pages = Math.ceil(filteredProducts.length / page_size);
-        
+
         return res.status(200).json({
             success: true,
             page: Number(page),
@@ -104,3 +105,95 @@ export async function searchItem (req, res) {
     }
 }
 
+// Product endpoints
+export async function addProduct (req, res) {
+    try {
+        const { groceryListId } = req.params;
+        const { name, brand, price, image_url } = req.body;
+
+        const grocery = await Grocery.findById(groceryListId);
+        if (!grocery) {
+            return res.status(404).json({ message: "Grocery list not found" });
+        }
+
+        const newProduct = { name, brand, price, image_url };
+        grocery.products.push(newProduct);
+        await grocery.save();
+
+        res.status(201).json({ message: "Product added successfully", product: newProduct, grocery: grocery });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
+export async function getProductsFromList (req, res) {
+    try {
+        const { groceryListId } = req.params;
+
+        const grocery = await Grocery.findById(groceryListId);
+        if (!grocery) {
+            return res.status(404).json({ message: "Grocery list not found" });
+        }
+
+        res.status(200).json(grocery.products);
+    } catch (error) {
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
+export async function removeProduct (req, res) {
+    try {
+        const { groceryListId, productId } = req.params;
+
+        const grocery = await Grocery.findById(groceryListId);
+        if (!grocery) {
+            return res.status(404).json({ message: "Grocery list not found" });
+        }
+
+        const productIndex = grocery.products.findIndex(p => p._id.toString() === productId);
+        if (productIndex === -1) {
+            return res.status(404).json({ message: "Product not found in list" });
+        }
+
+        const removedProduct = grocery.products.splice(productIndex, 1);
+        await grocery.save();
+
+        res.status(200).json({ message: "Product removed successfully", product: removedProduct });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
+export async function updateProduct(req, res) {
+    try {
+        const { groceryListId, productId } = req.params;
+
+        const grocery = await Grocery.findById(groceryListId);
+        if (!grocery) {
+            return res.status(404).json({ message: "Grocery list not found" });
+        }
+
+        const product = grocery.products.id(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found in list" });
+        }
+
+        const allowedUpdates = ["price", "image_url"];
+
+        allowedUpdates.forEach(field => {
+            if (req.body[field] !== undefined) {
+                product[field] = req.body[field];
+            }
+        });
+
+        await grocery.save();
+
+        res.status(200).json({
+            message: "Product updated successfully",
+            product
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
+    }
+}
