@@ -59,3 +59,48 @@ export const deleteItem = async (req, res) => {
         res.status(500).json({message: "Server Error" });
     }
 }
+
+
+export async function searchItem (req, res) {
+    try {
+        const { q, page = 1, page_size = 20, sort = "unique_scans_n" } = req.query;
+
+        if (!q) {
+            return res.status(400).json({ error: "Query parameter 'q' is required." });
+        }
+        const url = new URL("https://world.openfoodfacts.org/cgi/search.pl");
+
+        url.searchParams.append("search_terms", q)
+        url.searchParams.append("countries_tags", "en:philippines");
+        url.searchParams.append("page", page);
+        url.searchParams.append("page_size", page_size);
+        url.searchParams.append("action", "process");
+        url.searchParams.append("json", "1");
+        url.searchParams.append("sort_by", sort);
+        url.searchParams.append("fields", "product_name,brands,image_url,code,unique_scans_n");
+        
+        const apiRes = await fetch(url);
+
+        if (!apiRes.ok) {
+            throw new Error("Failed to fetch Open Food Facts data");
+        }
+        const data = await apiRes.json();
+
+        const filteredProducts = data.products.filter(p =>
+            (p.product_name && p.product_name.toLowerCase().includes(q.toLowerCase())) ||
+            (p.brands && p.brands.toLowerCase().includes(q.toLowerCase()))
+        );
+        const total_pages = Math.ceil(filteredProducts.length / page_size);
+        
+        return res.status(200).json({
+            success: true,
+            page: Number(page),
+            total_pages,
+            count: filteredProducts.length,
+            products: filteredProducts
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
