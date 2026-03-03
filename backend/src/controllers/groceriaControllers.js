@@ -178,6 +178,19 @@ export async function updateProduct(req, res) {
             return res.status(404).json({ message: "Product not found in list" });
         }
 
+
+        if (req.body.price !== undefined) {
+            const price = Number(req.body.price);
+
+            if (isNaN(price) || price < 0) {
+                return res.status(400).json({
+                    message: "Price must be a valid positive number"
+                });
+            }
+
+            product.price = price;
+        }
+
         const allowedUpdates = ["price", "image_url"];
 
         allowedUpdates.forEach(field => {

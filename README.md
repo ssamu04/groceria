@@ -6,6 +6,9 @@ Web App designed for easier grocery shopping!
 
 ***
 
+Frontend: React, DaisyUI, Tailwind CSS
+Backend: Express.js
+
 Visit the website at https://groceria-t9gc.onrender.com (Deployed using Render)
 
 

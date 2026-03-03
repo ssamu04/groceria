@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router'
 import DetailPage from './pages/DetailPage'
 import CreatePage from './pages/CreatePage'
 import HomePage from './pages/HomePage'
+import CartPage from './pages/CartPage'
 
 const App = () => {
   return (
@@ -12,6 +13,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="/create" element={<CreatePage />} />
+        <Route path="/cart" element={<CartPage />} />
       </Routes>
     </div>
   )

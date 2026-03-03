@@ -7,8 +7,7 @@ const Navbar = () => {
         <div className='mx-auto max-w-6xl p-4 flex justify-between items-center'>
             <h1 className='text-2xl font-bold text-primary'>Groceria</h1>
             <div className='flex items-center gap-4'>
-                {/* Edit Link to proper route */}
-                <Link to="/create" className='btn btn-primary btn-sm mr-2'>
+                <Link to="/cart" className='btn btn-primary btn-sm mr-2'>
                 <ShoppingCartIcon className='size-5'/>
                 <span>Your Cart</span>
                 </Link>
